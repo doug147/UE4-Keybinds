@@ -1,4 +1,5 @@
 #include "Keybinds.h"
+#include <iostream>
 
 /// <summary>
 /// Function handler for FSlateApplication::OnKeyDown.
@@ -14,8 +15,9 @@ bool Keybinds::OnKeyDown(const int32_t KeyCode, const uint32_t CharacterCode, co
 	{
 		Get().PressedKeys.insert(KeyCode);
 		Process(KeyCode);
+		return true;
 	}
-	return true;
+	return false;
 }
 
 /// <summary>
@@ -32,6 +34,25 @@ bool Keybinds::OnKeyUp(const int32_t KeyCode, const uint32_t CharacterCode, cons
 	return true;
 }
 
+bool Keybinds::OnMouseDown(const int32_t Button)
+{
+	auto const KeyCode = GetKeyCodeFromMouseButton((MouseButton)Button);
+	if (!!KeyCode)
+	{
+		Get().PressedKeys.insert(KeyCode);
+		Process(KeyCode);
+		return true;
+	}
+	return false;
+}
+
+bool Keybinds::OnMouseUp(const int32_t Button)
+{
+	auto const KeyCode = GetKeyCodeFromMouseButton((MouseButton)Button);
+	Get().PressedKeys.erase(KeyCode);
+	return true;
+}
+
 /// <summary>
 /// Returns the KeyCode from the FKey
 /// </summary>
@@ -42,9 +63,30 @@ int32_t Keybinds::GetKeyCodeFromKey(const sdk::FKey Key)
 	if (auto it = std::find_if(Get().KeyMap.begin(), Get().KeyMap.end(),
 			[&](const std::pair<int32_t, sdk::FKey>& pair) {
 				return pair.second == Key;
-			}); it != Get().KeyMap.end())
+			});
+		it != Get().KeyMap.end())
 	{
 		return it->first;
+	}
+	return 0;
+}
+
+int32_t Keybinds::GetKeyCodeFromMouseButton(const MouseButton Button)
+{
+	switch (Button)
+	{
+	case MouseButton::Left:
+		return VK_LBUTTON;
+	case MouseButton::Middle:
+		return VK_MBUTTON;
+	case MouseButton::Right:
+		return VK_RBUTTON;
+	case MouseButton::Thumb01:
+		return VK_XBUTTON1;
+	case MouseButton::Thumb02:
+		return VK_XBUTTON2;
+	case MouseButton::Invalid:
+		return 0;
 	}
 	return 0;
 }
