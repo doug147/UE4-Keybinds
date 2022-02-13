@@ -21,7 +21,7 @@ private:
 	Keybinds& operator=(Keybinds const&) = delete;
 	Keybinds& operator=(Keybinds&&) = delete;
 
-	std::unordered_map<int32_t, sdk::FKey> KeyMap {
+	std::unordered_map<int32_t, sdk::FKey> KeyMap{
 		{ VK_LBUTTON, sdk::FKey("LeftMouseButton") },
 		{ VK_RBUTTON, sdk::FKey("RightMouseButton") },
 		{ VK_MBUTTON, sdk::FKey("MiddleMouseButton") },
@@ -146,9 +146,19 @@ private:
 		{ 167, sdk::FKey("Section") }
 	};
 
+	enum MouseButton
+	{
+		Left = 0,
+		Middle,
+		Right,
+		Thumb01,
+		Thumb02,
+		Invalid,
+	};
+
 	static void Execute(const int32_t& KeyCode);
 
- public:
+public:
 	struct Function
 	{
 		std::function<void()> Function;
@@ -160,8 +170,11 @@ private:
 	std::unordered_map<int32_t, Function> FunctionMap{};
 
 	static int32_t GetKeyCodeFromKey(const sdk::FKey Key);
+	static int32_t GetKeyCodeFromMouseButton(const MouseButton Button);
 	static bool OnKeyDown(const int32_t KeyCode, const uint32_t CharacterCode, const bool IsRepeat);
 	static bool OnKeyUp(const int32_t KeyCode, const uint32_t CharacterCode, const bool IsRepeat);
+	static bool OnMouseDown(const int32_t Button);
+	static bool OnMouseUp(const int32_t Button);
 	static void ClearKeybind(const sdk::FKey Key);
 	static void SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat);
 	static void Process(const int32_t KeyCode);
