@@ -1,5 +1,4 @@
 #include "Keybinds.h"
-#include <iostream>
 
 /// <summary>
 /// Function handler for FSlateApplication::OnKeyDown.
