@@ -34,6 +34,12 @@ bool Keybinds::OnKeyUp(const int32_t KeyCode, const uint32_t CharacterCode, cons
 	return true;
 }
 
+/// <summary>
+/// Function handler for FSlateApplication::OnMouseDown.
+/// Adds the key to the set of pressed keys then immediately processes it
+/// </summary>
+/// <param name="Button"></param>
+/// <returns></returns>
 bool Keybinds::OnMouseDown(const int32_t Button)
 {
 	auto const KeyCode = GetKeyCodeFromMouseButton((MouseButton)Button);
@@ -46,6 +52,12 @@ bool Keybinds::OnMouseDown(const int32_t Button)
 	return false;
 }
 
+/// <summary>
+/// Function handler for FSlateApplication::OnMouseUp.
+/// Removes the KeyCode from the set of Pressed keys.
+/// </summary>
+/// <param name="Button"></param>
+/// <returns></returns>
 bool Keybinds::OnMouseUp(const int32_t Button)
 {
 	auto const KeyCode = GetKeyCodeFromMouseButton((MouseButton)Button);
@@ -71,6 +83,11 @@ int32_t Keybinds::GetKeyCodeFromKey(const sdk::FKey Key)
 	return 0;
 }
 
+/// <summary>
+/// Converts the MouseButton code provided from OnMouseDown and OnMouseUp to a virtual key code
+/// </summary>
+/// <param name="Button">MouseButton provided by FSlateApplication's OnMouseDown or OnMouseUp</param>
+/// <returns>Virtual key code</returns>
 int32_t Keybinds::GetKeyCodeFromMouseButton(const MouseButton Button)
 {
 	switch (Button)
