@@ -146,7 +146,7 @@ private:
 		{ 167, sdk::FKey("Section") }
 	};
 
-	enum MouseButton
+	enum class MouseButton : int32_t
 	{
 		Left = 0,
 		Middle,
