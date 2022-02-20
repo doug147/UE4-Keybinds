@@ -164,6 +164,7 @@ public:
 		std::function<void()> Function;
 		std::unordered_set<int32_t> ModifierKeys;
 		bool bRepeat = false;
+		bool bOnKeyUp = false;
 	};
 
 	std::unordered_set<int32_t> PressedKeys{};
@@ -176,8 +177,8 @@ public:
 	static bool OnMouseDown(const int32_t Button);
 	static bool OnMouseUp(const int32_t Button);
 	static void ClearKeybind(const sdk::FKey Key);
-	static void SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat);
-	static void Process(const int32_t KeyCode);
+	static void SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat, bool bOnKeyUp = false);
+	static void Process(const int32_t KeyCode, bool bOnKeyUp = false);
 	static void Process();
 
 	static __forceinline Keybinds& Get()
