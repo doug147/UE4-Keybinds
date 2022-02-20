@@ -1,4 +1,5 @@
 #include "Keybinds.h"
+#include <iostream>
 
 /// <summary>
 /// Function handler for FSlateApplication::OnKeyDown.
@@ -29,6 +30,7 @@ bool Keybinds::OnKeyDown(const int32_t KeyCode, const uint32_t CharacterCode, co
 /// <returns></returns>
 bool Keybinds::OnKeyUp(const int32_t KeyCode, const uint32_t CharacterCode, const bool IsRepeat)
 {
+	Process(KeyCode, true);
 	Get().PressedKeys.erase(KeyCode);
 	return true;
 }
@@ -127,7 +129,7 @@ void Keybinds::ClearKeybind(const sdk::FKey Key)
 /// <param name="InFunction">Function to execute</param>
 /// <param name="ModifierKeys">Set of modifier keys which will be resolved to KeyCodes</param>
 /// <param name="bRepeat">Whether or not to execute this function every tick</param>
-void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat)
+void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat, bool bOnKeyUp)
 {
 	const auto KeyCode = GetKeyCodeFromKey(Key);
 	if (!!KeyCode)
@@ -141,7 +143,7 @@ void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction,
 				ModifierKeyCodes.insert(ModifierKeyCode);
 			}
 		}
-		Get().FunctionMap[KeyCode] = Function{ InFunction, ModifierKeyCodes, bRepeat };
+		Get().FunctionMap[KeyCode] = Function{ InFunction, ModifierKeyCodes, bRepeat, bOnKeyUp };
 	}
 }
 
@@ -164,9 +166,9 @@ void Keybinds::Execute(const int32_t& KeyCode)
 /// Process a single key press when when a key was pressed with IsRepeat == false.
 /// </summary>
 /// <param name="KeyCode"></param>
-void Keybinds::Process(const int32_t KeyCode)
+void Keybinds::Process(const int32_t KeyCode, bool bOnKeyUp)
 {
-	if (Get().FunctionMap.contains(KeyCode))
+	if (Get().FunctionMap.contains(KeyCode) && Get().FunctionMap[KeyCode].bOnKeyUp == bOnKeyUp)
 	{
 		Execute(KeyCode);
 	}
@@ -178,6 +180,6 @@ void Keybinds::Process(const int32_t KeyCode)
 /// </summary>
 void Keybinds::Process()
 {
-	auto Matches = Get().PressedKeys | std::views::filter([&](const int32_t& i) { return Get().FunctionMap.contains(i) && Get().FunctionMap[i].bRepeat; });
+	auto Matches = Get().PressedKeys | std::views::filter([&](const int32_t& i) { return Get().FunctionMap.contains(i) && Get().FunctionMap[i].bRepeat && !Get().FunctionMap[i].bOnKeyUp; });
 	std::ranges::for_each(Matches.begin(), Matches.end(), Execute);
 }
