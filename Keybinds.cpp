@@ -129,7 +129,7 @@ void Keybinds::ClearKeybind(const sdk::FKey Key)
 /// <param name="InFunction">Function to execute</param>
 /// <param name="ModifierKeys">Set of modifier keys which will be resolved to KeyCodes</param>
 /// <param name="bRepeat">Whether or not to execute this function every tick</param>
-void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat, bool bOnKeyUp)
+void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat, std::function<void()> InKeyUpFunction)
 {
 	const auto KeyCode = GetKeyCodeFromKey(Key);
 	if (!!KeyCode)
@@ -143,7 +143,7 @@ void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction,
 				ModifierKeyCodes.insert(ModifierKeyCode);
 			}
 		}
-		Get().FunctionMap[KeyCode] = Function{ InFunction, ModifierKeyCodes, bRepeat, bOnKeyUp };
+		Get().FunctionMap[KeyCode] = Function{ InFunction, ModifierKeyCodes, bRepeat, InKeyUpFunction };
 	}
 }
 
@@ -153,13 +153,22 @@ void Keybinds::SetKeybind(const sdk::FKey Key, std::function<void()> InFunction,
 /// <param name="KeyCode">The original KeyCode passed from OnKeyDown</param>
 void Keybinds::Execute(const int32_t& KeyCode)
 {
-	auto&& ModifierKeys = Get().FunctionMap[KeyCode].ModifierKeys;
-	for (auto&& Key : ModifierKeys)
+	if (Get().FunctionMap[KeyCode].Function)
 	{
-		if (!Get().PressedKeys.contains(Key))
-			return;
+		auto&& ModifierKeys = Get().FunctionMap[KeyCode].ModifierKeys;
+		for (auto&& Key : ModifierKeys)
+		{
+			if (!Get().PressedKeys.contains(Key))
+				return;
+		}
+		Get().FunctionMap[KeyCode].Function();
 	}
-	Get().FunctionMap[KeyCode].Function();
+}
+
+void Keybinds::ExecuteKeyUp(const int32_t& KeyCode)
+{
+	if (Get().FunctionMap[KeyCode].KeyUpFunction)
+		Get().FunctionMap[KeyCode].KeyUpFunction();
 }
 
 /// <summary>
@@ -168,9 +177,10 @@ void Keybinds::Execute(const int32_t& KeyCode)
 /// <param name="KeyCode"></param>
 void Keybinds::Process(const int32_t KeyCode, bool bOnKeyUp)
 {
-	if (Get().FunctionMap.contains(KeyCode) && Get().FunctionMap[KeyCode].bOnKeyUp == bOnKeyUp)
+	if (Get().FunctionMap.contains(KeyCode))
 	{
-		Execute(KeyCode);
+		if (!bOnKeyUp) Execute(KeyCode);
+		else ExecuteKeyUp(KeyCode);
 	}
 }
 
@@ -180,6 +190,6 @@ void Keybinds::Process(const int32_t KeyCode, bool bOnKeyUp)
 /// </summary>
 void Keybinds::Process()
 {
-	auto Matches = Get().PressedKeys | std::views::filter([&](const int32_t& i) { return Get().FunctionMap.contains(i) && Get().FunctionMap[i].bRepeat && !Get().FunctionMap[i].bOnKeyUp; });
+	auto Matches = Get().PressedKeys | std::views::filter([&](const int32_t& i) { return Get().FunctionMap.contains(i) && Get().FunctionMap[i].Function && Get().FunctionMap[i].bRepeat; });
 	std::ranges::for_each(Matches.begin(), Matches.end(), Execute);
 }
