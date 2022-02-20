@@ -157,6 +157,7 @@ private:
 	};
 
 	static void Execute(const int32_t& KeyCode);
+	static void ExecuteKeyUp(const int32_t& KeyCode);
 
 public:
 	struct Function
@@ -164,7 +165,7 @@ public:
 		std::function<void()> Function;
 		std::unordered_set<int32_t> ModifierKeys;
 		bool bRepeat = false;
-		bool bOnKeyUp = false;
+		std::function<void()> KeyUpFunction;
 	};
 
 	std::unordered_set<int32_t> PressedKeys{};
@@ -177,7 +178,7 @@ public:
 	static bool OnMouseDown(const int32_t Button);
 	static bool OnMouseUp(const int32_t Button);
 	static void ClearKeybind(const sdk::FKey Key);
-	static void SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat, bool bOnKeyUp = false);
+	static void SetKeybind(const sdk::FKey Key, std::function<void()> InFunction, std::vector<sdk::FKey> ModifierKeys, bool bRepeat, std::function<void()> InKeyUpFunction = nullptr);
 	static void Process(const int32_t KeyCode, bool bOnKeyUp = false);
 	static void Process();
 
